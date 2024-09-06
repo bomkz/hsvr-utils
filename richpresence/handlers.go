@@ -38,7 +38,31 @@ func DataTypeHandler(message bytes.Buffer, datatype string) {
 func handleClientLogin() {
 	err := client.Login("1220960048704913448")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		go reconnectRPClient()
+	}
+	rpSuccess <- true
+}
+
+func reconnectRPClient() {
+	timer := time.NewTicker(10 * time.Second)
+	for {
+
+		if userOnline {
+			select {
+			case <-timer.C:
+				if userOnline {
+					handleClientLogin()
+				} else {
+					break
+				}
+			case <-rpSuccess:
+				break
+			}
+		} else {
+			break
+		}
+
 	}
 }
 

@@ -118,6 +118,8 @@ type userStatsStruct struct {
 
 var success = make(chan bool)
 
+var rpSuccess = make(chan bool)
+
 var reconnecting = false
 
 var steamID64 string

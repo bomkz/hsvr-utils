@@ -39,7 +39,7 @@ func ConnectWS() {
 func retryWS() {
 	var recon = 0
 
-	ReconnectTimer := time.NewTicker(30 * time.Second)
+	ReconnectTimer := time.NewTicker(10 * time.Second)
 	reconnecting = true
 
 	for {
