@@ -44,7 +44,10 @@ func createFileIfNotExists() {
 			log.Fatal(err)
 		}
 	} else {
-		file.Close()
+		err := file.Close()
+		if err != nil {
+			return
+		}
 
 	}
 }
@@ -184,7 +187,10 @@ func deleteLink() error {
 
 	startupDir := appdata + "\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\vtolvr.lnk"
 
-	os.Remove(startupDir)
+	err = os.Remove(startupDir)
+	if err != nil {
+		return err
+	}
 
 	return nil
 
