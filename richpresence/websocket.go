@@ -23,6 +23,7 @@ type WebSocket struct{}
 
 func ConnectWS() {
 
+	attemptedAt = time.Now()
 	socket, _, err := gws.NewClient(new(WebSocket), &gws.ClientOption{
 		Addr: "wss://hs.vtolvr.live",
 	})
@@ -39,7 +40,7 @@ func ConnectWS() {
 func retryWS() {
 	var recon = 0
 
-	ReconnectTimer := time.NewTicker(10 * time.Second)
+	ReconnectTimer := time.NewTicker(5 * time.Second)
 	reconnecting = true
 
 	for {
@@ -74,6 +75,14 @@ func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
 }
 
 func (c *WebSocket) OnOpen(socket *gws.Conn) {
+
+	if time.Since(attemptedAt) >= 5*time.Second {
+
+		log.Println("Websocket reconnect attempt timeout")
+		socket.NetConn().Close()
+		return
+
+	}
 
 	if reconnecting {
 		success <- true
