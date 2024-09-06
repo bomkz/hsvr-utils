@@ -3,7 +3,6 @@ package apifrontend
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/lxzan/gws"
 )
@@ -22,15 +21,6 @@ func main() {
 		return
 	}
 	go socket.ReadLoop()
-
-	for {
-		var text = ""
-		fmt.Scanf("%s", &text)
-		if strings.TrimSpace(text) == "" {
-			continue
-		}
-		socket.WriteString(text)
-	}
 }
 
 type WebSocket struct {

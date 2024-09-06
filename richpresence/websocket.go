@@ -3,11 +3,9 @@ package richpresence
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bomkz/vtolvr-utils/definitions"
@@ -42,21 +40,6 @@ func ConnectWS() {
 	}
 
 	go socket.ReadLoop()
-
-	for {
-		var text = ""
-		_, err := fmt.Scanf("%s", &text)
-		if err != nil {
-			return
-		}
-		if strings.TrimSpace(text) == "" {
-			continue
-		}
-		err = socket.WriteString(text)
-		if err != nil {
-			return
-		}
-	}
 
 }
 
