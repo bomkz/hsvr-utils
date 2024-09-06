@@ -52,5 +52,5 @@ func queryUser(UID string) {
 		log.Print(err)
 		return
 	}
-	definitions.Socket.WriteString(string(lookupBytes))
+	localSocket.WriteString(string(lookupBytes))
 }

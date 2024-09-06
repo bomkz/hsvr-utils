@@ -1,47 +1,122 @@
 package apifrontend
 
 import (
-	"fmt"
-	"log"
+	"bytes"
+	"encoding/json"
 
+	"log"
+	"strconv"
+	"time"
+
+	"github.com/bomkz/vtolvr-utils/definitions"
+	"github.com/google/uuid"
 	"github.com/lxzan/gws"
 )
 
-func main() {
+func handleWS(message bytes.Buffer, datatype string) {
+
+}
+
+type WebSocket struct{}
+
+func ConnectWS() {
+
 	socket, _, err := gws.NewClient(new(WebSocket), &gws.ClientOption{
 		Addr: "wss://hs.vtolvr.live",
-		PermessageDeflate: gws.PermessageDeflate{
-			Enabled:               true,
-			ServerContextTakeover: true,
-			ClientContextTakeover: true,
-		},
 	})
+
 	if err != nil {
-		log.Printf(err.Error())
+		log.Print(err)
 		return
 	}
+
 	go socket.ReadLoop()
+
 }
 
-type WebSocket struct {
+func retryWS() {
+	var recon = 0
+
+	ReconnectTimer := time.NewTicker(30 * time.Second)
+	reconnecting = true
+
+	for {
+
+		select {
+		case <-ReconnectTimer.C:
+			recon += 1
+
+			go ConnectWS()
+			log.Println("\nReconnection attempt " + strconv.Itoa(recon))
+		case <-success:
+			log.Println("\nReconnection attempt succeeded: Attempt #" + strconv.Itoa(recon))
+			ReconnectTimer.Stop()
+			reconnecting = false
+			return
+		}
+
+	}
+
 }
 
-func (c *WebSocket) OnClose(socket *gws.Conn, err error) {
-	fmt.Printf("onerror: err=%s\n", err.Error())
+func (c *WebSocket) OnClose(_ *gws.Conn, err error) {
+	log.Printf("onerror: err=%s\n", err.Error())
+	if !reconnecting {
+		WsStreamClosed <- true
+		localSocket = nil
+		go retryWS()
+	}
 }
 
-func (c *WebSocket) OnPong(socket *gws.Conn, payload []byte) {
+func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
 }
 
 func (c *WebSocket) OnOpen(socket *gws.Conn) {
-	_ = socket.WriteString("hello, there is client")
+
+	if reconnecting {
+		success <- true
+	}
+	localSocket = socket
+
+	log.Println("Client connection is open.")
 }
 
-func (c *WebSocket) OnPing(socket *gws.Conn, payload []byte) {
-	_ = socket.WritePong(payload)
+func (c *WebSocket) OnPing(socket *gws.Conn, _ []byte) {
+	var Pong definitions.PongStruct
+	Pong.MessageType = "pong"
+	Pong.PID = uuid.New()
+	pongByte, err := json.Marshal(Pong)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = socket.WriteString(string(pongByte))
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 func (c *WebSocket) OnMessage(socket *gws.Conn, message *gws.Message) {
-	defer message.Close()
-	fmt.Printf("recv: %s\n", message.Data.String())
+	defer func(message *gws.Message) {
+		err := message.Close()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}(message)
+
+	var DataType definitions.PayloadTypeStruct
+
+	err := json.Unmarshal(message.Bytes(), &DataType)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if DataType.MessageType == "ping" {
+		c.OnPing(socket, nil)
+		return
+	}
+	handleWS(*message.Data, DataType.MessageType)
 }

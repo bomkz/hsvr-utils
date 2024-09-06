@@ -14,13 +14,6 @@ import (
 	"github.com/lxzan/gws"
 )
 
-func InitRP() {
-	go ConnectWS()
-
-	go RichPresenceHandler()
-
-}
-
 func handleWS(message bytes.Buffer, datatype string) {
 	DataTypeHandler(message, datatype)
 
@@ -47,7 +40,7 @@ func retryWS() {
 	var recon = 0
 
 	ReconnectTimer := time.NewTicker(30 * time.Second)
-	definitions.Reconnecting = true
+	reconnecting = true
 
 	for {
 
@@ -57,10 +50,10 @@ func retryWS() {
 
 			go ConnectWS()
 			log.Println("\nReconnection attempt " + strconv.Itoa(recon))
-		case <-definitions.Success:
+		case <-success:
 			log.Println("\nReconnection attempt succeeded: Attempt #" + strconv.Itoa(recon))
 			ReconnectTimer.Stop()
-			definitions.Reconnecting = false
+			reconnecting = false
 			return
 		}
 
@@ -70,9 +63,9 @@ func retryWS() {
 
 func (c *WebSocket) OnClose(_ *gws.Conn, err error) {
 	log.Printf("onerror: err=%s\n", err.Error())
-	if !definitions.Reconnecting {
-		definitions.WsStreamClosed <- true
-		definitions.Socket = nil
+	if !reconnecting {
+		wsStreamClosed <- true
+		localSocket = nil
 		go retryWS()
 	}
 }
@@ -82,12 +75,12 @@ func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
 
 func (c *WebSocket) OnOpen(socket *gws.Conn) {
 
-	if definitions.Reconnecting {
-		definitions.Success <- true
+	if reconnecting {
+		success <- true
 	}
-	definitions.Socket = socket
+	localSocket = socket
 
-	var Subscriptions definitions.SubscribeStruct
+	var Subscriptions subscribeStruct
 
 	Subscriptions.MessageType = "subscribe"
 	Subscriptions.Data = append(Subscriptions.Data, "user_login", "user_logout", "death", "kill", "spawn", "online")
