@@ -6,12 +6,24 @@ import (
 	"os"
 	"strconv"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"github.com/bomkz/vtolvr-utils/apifrontend"
+	"github.com/bomkz/vtolvr-utils/definitions"
+	"github.com/bomkz/vtolvr-utils/richpresence"
+
 	"github.com/getlantern/systray"
-	"github.com/getlantern/systray/example/icon"
+
 	"github.com/jxeng/shortcut"
 )
 
 func main() {
+	hsvrApp := app.New()
+	aircraft := fyne.NewStaticResource("aircraft", definitions.Icon)
+	hsvrApp.SetIcon(aircraft)
+
+	definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
+
 	filename := "vtolvrutil.log"
 	homedir, err := os.UserHomeDir()
 	if err != nil {
@@ -26,7 +38,9 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 
 	log.Println("log file created")
-	systray.Run(onReady, onExit)
+	go systray.Run(onReady, onExit)
+	hsvrApp.Run()
+
 }
 
 func createFileIfNotExists() {
@@ -116,9 +130,10 @@ func checkIfStartupExists() (bool, error) {
 }
 
 func onReady() {
-	systray.SetIcon(icon.Data)
+	systray.SetIcon(definitions.Icon)
 	systray.SetTitle("VTOL VR Utilities")
 	systray.SetTooltip("VTOLVR Utils")
+
 	quit := systray.AddMenuItem("Quit", "Quit App")
 
 	exists, err := checkIfStartupExists()
@@ -129,6 +144,7 @@ func onReady() {
 	}
 
 	enableStartup := systray.AddMenuItemCheckbox("Start on boot", "Start the app when you log in.", false)
+	showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
 
 	if exists {
 		enableStartup.Check()
@@ -137,16 +153,14 @@ func onReady() {
 
 	int64SteamID64 := convertID3ToID64(steamID32)
 
-	steamID64 = strconv.Itoa(int(int64SteamID64))
+	definitions.SteamID64 = strconv.Itoa(int(int64SteamID64))
 
-	go connectWS()
-
-	go richPresenceHandler()
-
-	quit.SetIcon(icon.Data)
+	go richpresence.InitRP()
 
 	for {
 		select {
+		case <-showFrontend.ClickedCh:
+			apifrontend.BuildFrontend()
 		case <-quit.ClickedCh:
 			onExit()
 		case <-enableStartup.ClickedCh:

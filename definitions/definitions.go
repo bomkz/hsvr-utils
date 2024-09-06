@@ -1,11 +1,16 @@
-package main
+package definitions
 
 import (
+	_ "embed"
 	"time"
 
+	"fyne.io/fyne/v2"
 	"github.com/google/uuid"
 	"github.com/lxzan/gws"
 )
+
+//go:embed .\..\aircraft.ico
+var Icon []byte
 
 type PongStruct struct {
 	PID         uuid.UUID `json:"pid"`
@@ -176,17 +181,17 @@ type SpawnTypeStruct struct {
 	AV42C   int `json:"6"`
 }
 
-var success = make(chan bool)
-var reconnecting = false
+var Success = make(chan bool)
 
-type WebSocket struct {
-}
+var Reconnecting = false
 
-var steamID64 string
+var SteamID64 string
 
-var userOnline bool
+var UserOnline bool
 
-var onlineUsers OnlineStruct
+var FrontendWindow fyne.Window
+
+var OnlineUsers OnlineStruct
 
 var StopRichPresence = make(chan bool)
 
@@ -200,8 +205,8 @@ type UserStatsStruct struct {
 	SpawnedIn          bool
 }
 
-var latestUserStats UserStatsStruct
+var LatestUserStats UserStatsStruct
 
-var wsStreamClosed = make(chan bool)
+var WsStreamClosed = make(chan bool)
 
 var Socket *gws.Conn

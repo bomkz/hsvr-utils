@@ -1,4 +1,4 @@
-package main
+package richpresence
 
 import (
 	"bytes"
@@ -10,16 +10,27 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bomkz/vtolvr-utils/definitions"
+
 	"github.com/google/uuid"
 	"github.com/lxzan/gws"
 )
+
+func InitRP() {
+	go ConnectWS()
+
+	go RichPresenceHandler()
+
+}
 
 func handleWS(message bytes.Buffer, datatype string) {
 	DataTypeHandler(message, datatype)
 
 }
 
-func connectWS() {
+type WebSocket struct{}
+
+func ConnectWS() {
 
 	socket, _, err := gws.NewClient(new(WebSocket), &gws.ClientOption{
 		Addr: "wss://hs.vtolvr.live",
@@ -53,7 +64,7 @@ func retryWS() {
 	var recon = 0
 
 	ReconnectTimer := time.NewTicker(30 * time.Second)
-	reconnecting = true
+	definitions.Reconnecting = true
 
 	for {
 
@@ -61,13 +72,12 @@ func retryWS() {
 		case <-ReconnectTimer.C:
 			recon += 1
 
-			go connectWS()
-
+			go ConnectWS()
 			log.Println("\nReconnection attempt " + strconv.Itoa(recon))
-		case <-success:
+		case <-definitions.Success:
 			log.Println("\nReconnection attempt succeeded: Attempt #" + strconv.Itoa(recon))
 			ReconnectTimer.Stop()
-			reconnecting = false
+			definitions.Reconnecting = false
 			return
 		}
 
@@ -77,9 +87,9 @@ func retryWS() {
 
 func (c *WebSocket) OnClose(_ *gws.Conn, err error) {
 	log.Printf("onerror: err=%s\n", err.Error())
-	if !reconnecting {
-		wsStreamClosed <- true
-		Socket = nil
+	if !definitions.Reconnecting {
+		definitions.WsStreamClosed <- true
+		definitions.Socket = nil
 		go retryWS()
 	}
 }
@@ -89,12 +99,12 @@ func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
 
 func (c *WebSocket) OnOpen(socket *gws.Conn) {
 
-	if reconnecting {
-		success <- true
+	if definitions.Reconnecting {
+		definitions.Success <- true
 	}
-	Socket = socket
+	definitions.Socket = socket
 
-	var Subscriptions SubscribeStruct
+	var Subscriptions definitions.SubscribeStruct
 
 	Subscriptions.MessageType = "subscribe"
 	Subscriptions.Data = append(Subscriptions.Data, "user_login", "user_logout", "death", "kill", "spawn", "online")
@@ -115,7 +125,7 @@ func (c *WebSocket) OnOpen(socket *gws.Conn) {
 }
 
 func (c *WebSocket) OnPing(socket *gws.Conn, _ []byte) {
-	var Pong PongStruct
+	var Pong definitions.PongStruct
 	Pong.MessageType = "pong"
 	Pong.PID = uuid.New()
 	pongByte, err := json.Marshal(Pong)
@@ -139,7 +149,7 @@ func (c *WebSocket) OnMessage(socket *gws.Conn, message *gws.Message) {
 		}
 	}(message)
 
-	var DataType PayloadTypeStruct
+	var DataType definitions.PayloadTypeStruct
 
 	err := json.Unmarshal(message.Bytes(), &DataType)
 	if err != nil {

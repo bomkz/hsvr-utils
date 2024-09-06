@@ -1,4 +1,4 @@
-package main
+package richpresence
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/google/uuid"
 	"github.com/hugolgst/rich-go/client"
 )
@@ -46,11 +47,11 @@ func handleClientLogout() {
 
 }
 
-func richPresenceHandler() {
+func RichPresenceHandler() {
 	cooldown := time.NewTicker(16 * time.Second)
 	for range cooldown.C {
 
-		if userOnline {
+		if definitions.UserOnline {
 			updateRichPresence()
 		}
 
@@ -58,15 +59,15 @@ func richPresenceHandler() {
 }
 
 func updateRichPresence() {
-	latestUserStats.Ratio = float64(latestUserStats.Kills) / float64(latestUserStats.Deaths)
+	definitions.LatestUserStats.Ratio = float64(definitions.LatestUserStats.Kills) / float64(definitions.LatestUserStats.Deaths)
 
-	kdr := strconv.Itoa(latestUserStats.Kills) + "K/" + strconv.Itoa(latestUserStats.Deaths) + "D/" + fmt.Sprint(latestUserStats.Ratio) + "R"
-	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr
+	kdr := strconv.Itoa(definitions.LatestUserStats.Kills) + "K/" + strconv.Itoa(definitions.LatestUserStats.Deaths) + "D/" + fmt.Sprint(definitions.LatestUserStats.Ratio) + "R"
+	state := "ELO: " + fmt.Sprint(definitions.LatestUserStats.ELO) + " | " + kdr
 	details := "VTOLVR 24/7RankedBVR"
 	var aircraft string
 	var smalltext string
 	largetext := "Currently flying: "
-	switch latestUserStats.CurrentVehicle {
+	switch definitions.LatestUserStats.CurrentVehicle {
 	case "vtolvr":
 		largetext += "In Lobby"
 		aircraft = "vtolvr"
@@ -89,7 +90,7 @@ func updateRichPresence() {
 		smalltext = "Courtesy of dubyaaa"
 	}
 
-	timejoin := time.Unix(latestUserStats.LastSpawnTimestamp.Unix(), 0)
+	timejoin := time.Unix(definitions.LatestUserStats.LastSpawnTimestamp.Unix(), 0)
 	err := client.SetActivity(client.Activity{
 		State:      state,
 		Details:    details,
@@ -108,7 +109,7 @@ func updateRichPresence() {
 }
 
 func populateELO(message bytes.Buffer) {
-	var newUserLookup UserLookupResultStruct
+	var newUserLookup definitions.UserLookupResultStruct
 
 	err := json.Unmarshal(message.Bytes(), &newUserLookup)
 	if err != nil {
@@ -116,12 +117,12 @@ func populateELO(message bytes.Buffer) {
 		return
 	}
 
-	latestUserStats.ELO = int(newUserLookup.Result.ELO)
+	definitions.LatestUserStats.ELO = int(newUserLookup.Result.ELO)
 
 }
 func queryUser() {
 
-	var newUserLookup UserLookup
+	var newUserLookup definitions.UserLookup
 
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
@@ -130,7 +131,7 @@ func queryUser() {
 	}
 	newUserLookup.MessageType = "lookup"
 	newUserLookup.Data.PID = newUUID.String()
-	newUserLookup.Data.UID = steamID64
+	newUserLookup.Data.UID = definitions.SteamID64
 	newUserLookup.Data.Category = "user"
 
 	newUserLookupByte, err := json.Marshal(newUserLookup)
@@ -139,7 +140,7 @@ func queryUser() {
 		return
 	}
 
-	err = Socket.WriteString(string(newUserLookupByte))
+	err = definitions.Socket.WriteString(string(newUserLookupByte))
 	if err != nil {
 		log.Println(err)
 		return
@@ -147,8 +148,8 @@ func queryUser() {
 }
 
 func checkIfUserIsOnline() bool {
-	for _, y := range onlineUsers.Data {
-		if y.UID == steamID64 {
+	for _, y := range definitions.OnlineUsers.Data {
+		if y.UID == definitions.SteamID64 {
 			return true
 		}
 	}
@@ -156,7 +157,7 @@ func checkIfUserIsOnline() bool {
 }
 
 func onUserLogin(message bytes.Buffer) {
-	var UserLogin LogStruct
+	var UserLogin definitions.LogStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogin)
 	if err != nil {
 		log.Println(err)
@@ -166,7 +167,7 @@ func onUserLogin(message bytes.Buffer) {
 }
 
 func onUserLogout(message bytes.Buffer) {
-	var UserLogout LogStruct
+	var UserLogout definitions.LogStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogout)
 	if err != nil {
 		log.Println(err)
@@ -176,25 +177,25 @@ func onUserLogout(message bytes.Buffer) {
 }
 
 func onOnlineUpdate(message bytes.Buffer) {
-	var OnlineUpdate OnlineStruct
+	var OnlineUpdate definitions.OnlineStruct
 	err := json.Unmarshal(message.Bytes(), &OnlineUpdate)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	onlineUsers = OnlineUpdate
+	definitions.OnlineUsers = OnlineUpdate
 
 	isOnline := checkIfUserIsOnline()
-	if isOnline && !userOnline {
+	if isOnline && !definitions.UserOnline {
 		handleUserOnline()
-	} else if !isOnline && userOnline {
+	} else if !isOnline && definitions.UserOnline {
 		handleUserOffline()
 	}
 
 }
 
 func onSpawn(message bytes.Buffer) {
-	var Spawn SpawnStruct
+	var Spawn definitions.SpawnStruct
 	err := json.Unmarshal(message.Bytes(), &Spawn)
 	if err != nil {
 		log.Println(err)
@@ -202,19 +203,19 @@ func onSpawn(message bytes.Buffer) {
 	}
 
 	for _, y := range Spawn.Data.User.Occupants {
-		if y == steamID64 && !userOnline {
+		if y == definitions.SteamID64 && !definitions.UserOnline {
 			handleUserOnline()
 		}
-		if y == steamID64 {
-			latestUserStats.LastSpawnTimestamp = time.Now()
-			latestUserStats.CurrentVehicle = Spawn.Data.User.Type
+		if y == definitions.SteamID64 {
+			definitions.LatestUserStats.LastSpawnTimestamp = time.Now()
+			definitions.LatestUserStats.CurrentVehicle = Spawn.Data.User.Type
 		}
 	}
 
 }
 
 func onDeath(message bytes.Buffer) {
-	var Death DeathStruct
+	var Death definitions.DeathStruct
 	err := json.Unmarshal(message.Bytes(), &Death)
 	if err != nil {
 		log.Println(err)
@@ -222,31 +223,31 @@ func onDeath(message bytes.Buffer) {
 	}
 
 	for _, y := range Death.Data.Victim.Occupants {
-		if y == steamID64 && !userOnline {
+		if y == definitions.SteamID64 && !definitions.UserOnline {
 			handleUserOnline()
 		}
-		if y == steamID64 {
-			latestUserStats.CurrentVehicle = "vtolvr"
-			latestUserStats.Deaths += 1
-			latestUserStats.SpawnedIn = false
+		if y == definitions.SteamID64 {
+			definitions.LatestUserStats.CurrentVehicle = "vtolvr"
+			definitions.LatestUserStats.Deaths += 1
+			definitions.LatestUserStats.SpawnedIn = false
 		}
 	}
 
 }
 
 func onKill(message bytes.Buffer) {
-	var Kill KillStruct
+	var Kill definitions.KillStruct
 	err := json.Unmarshal(message.Bytes(), &Kill)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	for _, y := range Kill.Data.Killer.Occupants {
-		if y == steamID64 && !userOnline {
+		if y == definitions.SteamID64 && !definitions.UserOnline {
 			handleUserOnline()
 		}
-		if y == steamID64 {
-			latestUserStats.Kills += 1
+		if y == definitions.SteamID64 {
+			definitions.LatestUserStats.Kills += 1
 		}
 
 	}
@@ -254,14 +255,14 @@ func onKill(message bytes.Buffer) {
 }
 
 func handleUserOnline() {
-	userOnline = true
+	definitions.UserOnline = true
 	handleClientLogin()
 	queryUser()
 	handleClientLogin()
 }
 
 func handleUserOffline() {
-	latestUserStats = UserStatsStruct{}
+	definitions.LatestUserStats = definitions.UserStatsStruct{}
 	handleClientLogout()
-	userOnline = false
+	definitions.UserOnline = false
 }
