@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:embed .\..\aircraft.ico
+//go:embed ./../aircraft.ico
 var Icon []byte
 
 type PongStruct struct {
