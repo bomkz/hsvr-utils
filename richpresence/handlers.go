@@ -1,4 +1,4 @@
-package main
+package richpresence
 
 import (
 	"bytes"
@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/google/uuid"
 	"github.com/hugolgst/rich-go/client"
 )
 
 func DataTypeHandler(message bytes.Buffer, datatype string) {
 
-	log.Println(datatype+": ", message.String())
 	switch datatype {
 	case "user_logout":
 		onUserLogout(message)
@@ -37,8 +37,38 @@ func DataTypeHandler(message bytes.Buffer, datatype string) {
 func handleClientLogin() {
 	err := client.Login("1220960048704913448")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		go reconnectRPClient()
+		reconnectingRP = true
 	}
+	if reconnectingRP {
+		rpSuccess <- true
+	}
+
+}
+
+func reconnectRPClient() {
+	timer := time.NewTicker(10 * time.Second)
+	for {
+
+		if userOnline {
+			select {
+			case <-timer.C:
+				if userOnline {
+					handleUserOnline()
+				} else {
+					break
+				}
+			case <-rpSuccess:
+				reconnectingRP = false
+				break
+			}
+		} else {
+			break
+		}
+
+	}
+	timer.Stop()
 }
 
 func handleClientLogout() {
@@ -46,7 +76,7 @@ func handleClientLogout() {
 
 }
 
-func richPresenceHandler() {
+func rpHandler() {
 	cooldown := time.NewTicker(16 * time.Second)
 	for range cooldown.C {
 
@@ -58,7 +88,14 @@ func richPresenceHandler() {
 }
 
 func updateRichPresence() {
-	latestUserStats.Ratio = float64(latestUserStats.Kills) / float64(latestUserStats.Deaths)
+
+	if latestUserStats.Kills == 0 && latestUserStats.Deaths != 0 {
+		latestUserStats.Ratio = float64(latestUserStats.Deaths) / -1
+	} else if latestUserStats.Kills != 0 && latestUserStats.Deaths == 0 {
+		latestUserStats.Ratio = float64(latestUserStats.Kills)
+	} else {
+		latestUserStats.Ratio = float64(latestUserStats.Kills) / float64(latestUserStats.Deaths)
+	}
 
 	kdr := strconv.Itoa(latestUserStats.Kills) + "K/" + strconv.Itoa(latestUserStats.Deaths) + "D/" + fmt.Sprint(latestUserStats.Ratio) + "R"
 	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr
@@ -107,8 +144,22 @@ func updateRichPresence() {
 	}
 }
 
+func HandleInit() {
+	go ConnectWS()
+
+	go rpHandler()
+
+	steamID32 := findCurrentUID()
+
+	int64SteamID64 := convertID3ToID64(steamID32)
+
+	steamID64 = strconv.Itoa(int(int64SteamID64))
+
+	log.Println(steamID64)
+
+}
 func populateELO(message bytes.Buffer) {
-	var newUserLookup UserLookupResultStruct
+	var newUserLookup definitions.UserLookupResultStruct
 
 	err := json.Unmarshal(message.Bytes(), &newUserLookup)
 	if err != nil {
@@ -121,7 +172,7 @@ func populateELO(message bytes.Buffer) {
 }
 func queryUser() {
 
-	var newUserLookup UserLookup
+	var newUserLookup definitions.LookupStruct
 
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
@@ -139,7 +190,7 @@ func queryUser() {
 		return
 	}
 
-	err = Socket.WriteString(string(newUserLookupByte))
+	err = localSocket.WriteString(string(newUserLookupByte))
 	if err != nil {
 		log.Println(err)
 		return
@@ -156,7 +207,7 @@ func checkIfUserIsOnline() bool {
 }
 
 func onUserLogin(message bytes.Buffer) {
-	var UserLogin LogStruct
+	var UserLogin logStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogin)
 	if err != nil {
 		log.Println(err)
@@ -166,7 +217,7 @@ func onUserLogin(message bytes.Buffer) {
 }
 
 func onUserLogout(message bytes.Buffer) {
-	var UserLogout LogStruct
+	var UserLogout logStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogout)
 	if err != nil {
 		log.Println(err)
@@ -176,7 +227,7 @@ func onUserLogout(message bytes.Buffer) {
 }
 
 func onOnlineUpdate(message bytes.Buffer) {
-	var OnlineUpdate OnlineStruct
+	var OnlineUpdate onlineStruct
 	err := json.Unmarshal(message.Bytes(), &OnlineUpdate)
 	if err != nil {
 		log.Println(err)
@@ -194,7 +245,7 @@ func onOnlineUpdate(message bytes.Buffer) {
 }
 
 func onSpawn(message bytes.Buffer) {
-	var Spawn SpawnStruct
+	var Spawn spawnStruct
 	err := json.Unmarshal(message.Bytes(), &Spawn)
 	if err != nil {
 		log.Println(err)
@@ -214,7 +265,7 @@ func onSpawn(message bytes.Buffer) {
 }
 
 func onDeath(message bytes.Buffer) {
-	var Death DeathStruct
+	var Death deathStruct
 	err := json.Unmarshal(message.Bytes(), &Death)
 	if err != nil {
 		log.Println(err)
@@ -235,7 +286,7 @@ func onDeath(message bytes.Buffer) {
 }
 
 func onKill(message bytes.Buffer) {
-	var Kill KillStruct
+	var Kill killStruct
 	err := json.Unmarshal(message.Bytes(), &Kill)
 	if err != nil {
 		log.Println(err)
@@ -257,11 +308,10 @@ func handleUserOnline() {
 	userOnline = true
 	handleClientLogin()
 	queryUser()
-	handleClientLogin()
 }
 
 func handleUserOffline() {
-	latestUserStats = UserStatsStruct{}
+	latestUserStats = userStatsStruct{}
 	handleClientLogout()
 	userOnline = false
 }
