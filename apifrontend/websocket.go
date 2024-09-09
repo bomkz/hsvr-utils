@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 
 	"log"
-	"strconv"
-	"time"
 
 	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/google/uuid"
@@ -19,7 +17,7 @@ func handleWS(message bytes.Buffer, datatype string) {
 
 type WebSocket struct{}
 
-func ConnectWS() {
+func connectWS() error {
 
 	socket, _, err := gws.NewClient(new(WebSocket), &gws.ClientOption{
 		Addr: "wss://hs.vtolvr.live",
@@ -27,45 +25,17 @@ func ConnectWS() {
 
 	if err != nil {
 		log.Print(err)
-		return
+		return err
 	}
 
 	go socket.ReadLoop()
-
-}
-
-func retryWS() {
-	var recon = 0
-
-	ReconnectTimer := time.NewTicker(30 * time.Second)
-	reconnecting = true
-
-	for {
-
-		select {
-		case <-ReconnectTimer.C:
-			recon += 1
-
-			go ConnectWS()
-			log.Println("\nReconnection attempt " + strconv.Itoa(recon))
-		case <-success:
-			log.Println("\nReconnection attempt succeeded: Attempt #" + strconv.Itoa(recon))
-			ReconnectTimer.Stop()
-			reconnecting = false
-			return
-		}
-
-	}
+	return nil
 
 }
 
 func (c *WebSocket) OnClose(_ *gws.Conn, err error) {
 	log.Printf("onerror: err=%s\n", err.Error())
-	if !reconnecting {
-		WsStreamClosed <- true
-		localSocket = nil
-		go retryWS()
-	}
+
 }
 
 func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
@@ -73,9 +43,6 @@ func (c *WebSocket) OnPong(_ *gws.Conn, _ []byte) {
 
 func (c *WebSocket) OnOpen(socket *gws.Conn) {
 
-	if reconnecting {
-		success <- true
-	}
 	localSocket = socket
 
 	log.Println("Client connection is open.")

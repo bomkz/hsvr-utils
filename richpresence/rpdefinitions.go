@@ -116,6 +116,8 @@ type userStatsStruct struct {
 	SpawnedIn          bool
 }
 
+var reconnectingRP bool
+
 var attemptedAt time.Time
 
 var success = make(chan bool)

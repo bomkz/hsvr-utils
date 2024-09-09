@@ -1,11 +1,18 @@
 package apifrontend
 
-import "github.com/lxzan/gws"
+import (
+	"bytes"
 
-var reconnecting bool
+	"github.com/lxzan/gws"
+)
 
-var success = make(chan bool)
+type messageStruct struct {
+	message bytes.Buffer
+	PID     string
+}
 
 var WsStreamClosed = make(chan bool)
 
 var localSocket *gws.Conn
+
+var messages []messageStruct

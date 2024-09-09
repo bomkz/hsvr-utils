@@ -1,20 +1,24 @@
 package definitions
 
-import "github.com/google/uuid"
-
-type UserLookup struct {
-	MessageType string         `json:"type"`
-	Data        UserLookupData `json:"data"`
+type LookupStruct struct {
+	MessageType string           `json:"type"`
+	Data        LookupDataStruct `json:"data"`
 }
 
-type UserLookupData struct {
+type LookupDataStruct struct {
 	UID      string `json:"id"`
 	PID      string `json:"pid"`
 	Category string `json:"category"`
 }
 
+type LookupResultsTypeStruct struct {
+	PID         string `json:"pid"`
+	MessageType string `json:"type"`
+	OrgType     string `json:"orgType"`
+}
+
 type UserLookupResultStruct struct {
-	PID         uuid.UUID                  `json:"pid"`
+	PID         string                     `json:"pid"`
 	MessageType string                     `json:"type"`
 	OrgType     string                     `json:"orgType"`
 	Result      UserLookupResultDataStruct `json:"result"`
@@ -32,7 +36,7 @@ type UserLookupResultDataStruct struct {
 	ELO                     float64                  `json:"elo"`
 	ELOHistory              []ELOHistoryStruct       `json:"eloHistory"`
 	Rank                    int                      `json:"rank"`
-	History                 string                   `json:"history"`
+	History                 []string                 `json:"history"`
 	DiscordID               string                   `json:"discordId"`
 	IsBanned                bool                     `json:"isBanned"`
 	TeamKills               int                      `json:"teamKills"`

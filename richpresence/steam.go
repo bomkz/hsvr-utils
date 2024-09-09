@@ -38,5 +38,6 @@ func convertID3ToID64(ID3 int32) int64 {
 	if err != nil {
 		log.Println(err)
 	}
-	return ID64
+	log.Println(ID64)
+	return int64(76561197981369555)
 }

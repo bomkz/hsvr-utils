@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 	"github.com/bomkz/vtolvr-utils/apifrontend"
 	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/bomkz/vtolvr-utils/richpresence"
@@ -14,11 +12,11 @@ import (
 )
 
 func main() {
-	hsvrApp := app.New()
-	aircraft := fyne.NewStaticResource("aircraft", definitions.Icon)
-	hsvrApp.SetIcon(aircraft)
+	//hsvrApp := app.New()
+	//aircraft := fyne.NewStaticResource("aircraft", definitions.Icon)
+	//hsvrApp.SetIcon(aircraft)
 
-	definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
+	//definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
 
 	filename := "vtolvrutil.log"
 	homedir, err := os.UserHomeDir()
@@ -35,7 +33,7 @@ func main() {
 
 	log.Println("log file created")
 	go systray.Run(onReady, onExit)
-	hsvrApp.Run()
+	//hsvrApp.Run()
 
 }
 
@@ -54,7 +52,7 @@ func onReady() {
 	}
 
 	enableStartup := systray.AddMenuItemCheckbox("Start on boot", "Start the app when you log in.", false)
-	showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
+	//showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
 
 	if exists {
 		enableStartup.Check()

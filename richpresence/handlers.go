@@ -16,7 +16,6 @@ import (
 
 func DataTypeHandler(message bytes.Buffer, datatype string) {
 
-	log.Println(datatype+": ", message.String())
 	switch datatype {
 	case "user_logout":
 		onUserLogout(message)
@@ -40,8 +39,12 @@ func handleClientLogin() {
 	if err != nil {
 		log.Print(err)
 		go reconnectRPClient()
+		reconnectingRP = true
 	}
-	rpSuccess <- true
+	if reconnectingRP {
+		rpSuccess <- true
+	}
+
 }
 
 func reconnectRPClient() {
@@ -52,11 +55,12 @@ func reconnectRPClient() {
 			select {
 			case <-timer.C:
 				if userOnline {
-					handleClientLogin()
+					handleUserOnline()
 				} else {
 					break
 				}
 			case <-rpSuccess:
+				reconnectingRP = false
 				break
 			}
 		} else {
@@ -64,6 +68,7 @@ func reconnectRPClient() {
 		}
 
 	}
+	timer.Stop()
 }
 
 func handleClientLogout() {
@@ -143,6 +148,8 @@ func HandleInit() {
 
 	steamID64 = strconv.Itoa(int(int64SteamID64))
 
+	log.Println(steamID64)
+
 }
 func populateELO(message bytes.Buffer) {
 	var newUserLookup definitions.UserLookupResultStruct
@@ -158,7 +165,7 @@ func populateELO(message bytes.Buffer) {
 }
 func queryUser() {
 
-	var newUserLookup definitions.UserLookup
+	var newUserLookup definitions.LookupStruct
 
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
@@ -294,7 +301,6 @@ func handleUserOnline() {
 	userOnline = true
 	handleClientLogin()
 	queryUser()
-	handleClientLogin()
 }
 
 func handleUserOffline() {

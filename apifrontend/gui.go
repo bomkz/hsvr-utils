@@ -1,8 +1,10 @@
 package apifrontend
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -38,9 +40,9 @@ func PreventFrontendClose() {
 
 func queryUser(UID string) {
 
-	newLookup := definitions.UserLookup{
+	newLookup := definitions.LookupStruct{
 		MessageType: "lookup",
-		Data: definitions.UserLookupData{
+		Data: definitions.LookupDataStruct{
 			UID:      UID,
 			PID:      uuid.NewString(),
 			Category: "user",
@@ -52,5 +54,32 @@ func queryUser(UID string) {
 		log.Print(err)
 		return
 	}
+
+	err = connectWS()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	localSocket.WriteString(string(lookupBytes))
+
+	timer := time.NewTicker(1 * time.Second)
+
+	var result bytes.Buffer
+	for range timer.C {
+		found := false
+		for _, y := range messages {
+			if y.PID == newLookup.Data.PID {
+				result = y.message
+				found = true
+				break
+			}
+		}
+		if found {
+			timer.Stop()
+			break
+		}
+	}
+	localSocket.NetConn().Close()
+	log.Println(result.String())
+
 }
