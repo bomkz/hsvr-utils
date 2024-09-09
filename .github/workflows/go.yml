@@ -28,7 +28,7 @@ jobs:
         run: go mod tidy
 
       - name: Build Tyro
-        run: GOOS=windows GOARCH=amd64 go build  -ldflags="-H=windowsgui -s -w -X 'main.Version=${{ github.event.inputs.Version }}'"  -o VTOLVR-Utils.exe -v ./...
+        run: GOOS=windows GOARCH=amd64 go build  -ldflags="-H=windowsgui -s -w -X 'main.Version=${{ github.event.inputs.Version }}'"  -o HSVR-Utils.exe -v ./...
 
       - name: Create new Release
         env:
@@ -40,4 +40,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run:
-          gh release upload ${{ github.event.inputs.Version }} VTOLVR-Utils.exe
+          gh release upload ${{ github.event.inputs.Version }} HSVR-Utils.exe
