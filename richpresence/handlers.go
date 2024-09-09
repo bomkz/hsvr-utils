@@ -76,7 +76,7 @@ func handleClientLogout() {
 
 }
 
-func RichPresenceHandler() {
+func rpHandler() {
 	cooldown := time.NewTicker(16 * time.Second)
 	for range cooldown.C {
 
@@ -88,7 +88,14 @@ func RichPresenceHandler() {
 }
 
 func updateRichPresence() {
-	latestUserStats.Ratio = float64(latestUserStats.Kills) / float64(latestUserStats.Deaths)
+
+	if latestUserStats.Kills == 0 && latestUserStats.Deaths != 0 {
+		latestUserStats.Ratio = float64(latestUserStats.Deaths) / -1
+	} else if latestUserStats.Kills != 0 && latestUserStats.Deaths == 0 {
+		latestUserStats.Ratio = float64(latestUserStats.Kills)
+	} else {
+		latestUserStats.Ratio = float64(latestUserStats.Kills) / float64(latestUserStats.Deaths)
+	}
 
 	kdr := strconv.Itoa(latestUserStats.Kills) + "K/" + strconv.Itoa(latestUserStats.Deaths) + "D/" + fmt.Sprint(latestUserStats.Ratio) + "R"
 	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr
@@ -140,7 +147,7 @@ func updateRichPresence() {
 func HandleInit() {
 	go ConnectWS()
 
-	go RichPresenceHandler()
+	go rpHandler()
 
 	steamID32 := findCurrentUID()
 

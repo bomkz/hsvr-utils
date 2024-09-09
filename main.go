@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/bomkz/vtolvr-utils/apifrontend"
 	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/bomkz/vtolvr-utils/richpresence"
 
@@ -62,8 +61,8 @@ func onReady() {
 
 	for {
 		select {
-		case <-showFrontend.ClickedCh:
-			apifrontend.BuildFrontend()
+		//case <-showFrontend.ClickedCh:
+		//apifrontend.BuildFrontend()
 		case <-quit.ClickedCh:
 			onExit()
 		case <-enableStartup.ClickedCh:
