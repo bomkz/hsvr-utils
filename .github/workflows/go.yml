@@ -28,7 +28,7 @@ jobs:
         run: go mod tidy
 
       - name: Build Tyro
-        run: GOOS=windows GOARCH=amd64 go build  -ldflags="-H=windowsgui -s -w -X 'main.Version=${{ github.event.inputs.Version }}'"  -o HSVR-Utils.exe -v ./...
+        run: GOOS=windows GOARCH=amd64 go build  -ldflags="-H=windowsgui -s -w -X 'main.Version=${{ github.event.inputs.Version }}'"  -o HSVR-Utils.exe -v
 
       - name: Create new Release
         env:
