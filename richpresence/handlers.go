@@ -98,7 +98,7 @@ func updateRichPresence() {
 	}
 
 	kdr := strconv.Itoa(latestUserStats.Kills) + "K/" + strconv.Itoa(latestUserStats.Deaths) + "D/" + fmt.Sprint(latestUserStats.Ratio) + "R"
-	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr
+	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr + " | " + "Rank:" + fmt.Sprint(latestUserStats.CurrentRank)
 	details := "VTOLVR 24/7RankedBVR"
 	var aircraft string
 	var smalltext string
@@ -168,6 +168,8 @@ func populateELO(message bytes.Buffer) {
 	}
 
 	latestUserStats.ELO = int(newUserLookup.Result.ELO)
+
+	latestUserStats.CurrentRank = newUserLookup.Result.Rank
 
 }
 func queryUser() {
@@ -275,11 +277,13 @@ func onDeath(message bytes.Buffer) {
 	for _, y := range Death.Data.Victim.Occupants {
 		if y == steamID64 && !userOnline {
 			handleUserOnline()
+			go queryUser()
 		}
 		if y == steamID64 {
 			latestUserStats.CurrentVehicle = "vtolvr"
 			latestUserStats.Deaths += 1
 			latestUserStats.SpawnedIn = false
+			go queryUser()
 		}
 	}
 
@@ -295,9 +299,11 @@ func onKill(message bytes.Buffer) {
 	for _, y := range Kill.Data.Killer.Occupants {
 		if y == steamID64 && !userOnline {
 			handleUserOnline()
+			go queryUser()
 		}
 		if y == steamID64 {
 			latestUserStats.Kills += 1
+			go queryUser()
 		}
 
 	}

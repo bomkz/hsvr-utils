@@ -113,6 +113,7 @@ type userStatsStruct struct {
 	ELO                int
 	LastSpawnTimestamp time.Time
 	CurrentVehicle     string
+	CurrentRank        int
 	SpawnedIn          bool
 }
 
