@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bomkz/vtolvr-utils/definitions"
+	"github.com/bomkz/hsvr-utils/definitions"
 
 	"github.com/google/uuid"
 	"github.com/lxzan/gws"

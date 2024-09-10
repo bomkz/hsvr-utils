@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/bomkz/vtolvr-utils/definitions"
+	"github.com/bomkz/hsvr-utils/definitions"
 )
 
 func handleWs(message bytes.Buffer) {

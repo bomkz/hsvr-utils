@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/bomkz/vtolvr-utils/definitions"
+	"github.com/bomkz/hsvr-utils/definitions"
 	"github.com/google/uuid"
 )
 
