@@ -2,12 +2,10 @@ package main
 
 import (
 	updatechecker "github.com/Christian1984/go-update-checker"
-	"log"
-	"os"
-	"os/exec"
-
 	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/bomkz/vtolvr-utils/richpresence"
+	"log"
+	"os"
 
 	"github.com/getlantern/systray"
 )
@@ -84,7 +82,7 @@ func onReady() {
 		//case <-showFrontend.ClickedCh:
 		//apifrontend.BuildFrontend()
 		case <-c.ClickedCh:
-			err := exec.Command("open", "https://github.com/bomkz/hsvr-utils/releases/latest").Run()
+			openbrowser("https://github.com/bomkz/hsvr-utils/releases/latest")
 			if err != nil {
 				log.Println(err)
 			}
