@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	updatechecker "github.com/Christian1984/go-update-checker"
 	"github.com/bomkz/hsvr-utils/definitions"
 	"github.com/bomkz/hsvr-utils/richpresence"
@@ -10,7 +11,7 @@ import (
 	"github.com/getlantern/systray"
 )
 
-var Version = "1.2.3"
+var Version = "0.0.0"
 
 func main() {
 	//hsvrApp := app.New()
@@ -22,12 +23,14 @@ func main() {
 	filename := "hsvr-utils.log"
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	createFileIfNotExists()
 	file, err := openLogFile(homedir + "\\" + filename)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	log.SetOutput(file)
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)

@@ -90,7 +90,7 @@ func makeLink() error {
 }
 
 func createFileIfNotExists() {
-	filename := "vtolvrutil.log"
+	filename := "hsvr-util.log"
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
