@@ -21,11 +21,6 @@ func main() {
 
 	//definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
 
-	uc := updatechecker.New("bomkz", "hsvr-utils", "HSVR Utilities", "https://github.com/bomkz/hsvr-utils/releases/latest", 0, false)
-	uc.CheckForUpdate(Version)
-
-	needsUpdate = uc.UpdateAvailable
-
 	filename := "hsvr-utils.log"
 	homedir, err := os.UserHomeDir()
 	if err != nil {
@@ -40,6 +35,11 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 
 	log.Println("log file created")
+
+	uc := updatechecker.New("bomkz", "hsvr-utils", "HSVR Utilities", "https://github.com/bomkz/hsvr-utils/releases/latest", 0, false)
+	uc.CheckForUpdate(Version)
+
+	needsUpdate = uc.UpdateAvailable
 	systray.Run(onReady, onExit)
 	//hsvrApp.Run()
 
