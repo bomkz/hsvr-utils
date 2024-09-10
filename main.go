@@ -1,14 +1,18 @@
 package main
 
 import (
+	updatechecker "github.com/Christian1984/go-update-checker"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/bomkz/vtolvr-utils/definitions"
 	"github.com/bomkz/vtolvr-utils/richpresence"
 
 	"github.com/getlantern/systray"
 )
+
+var Version = "0.0"
 
 func main() {
 	//hsvrApp := app.New()
@@ -17,7 +21,12 @@ func main() {
 
 	//definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
 
-	filename := "vtolvrutil.log"
+	uc := updatechecker.New("bomkz", "hsvr-utils", "HSVR Utilities", "https://github.com/bomkz/hsvr-utils/releases/latest", 0, false)
+	uc.CheckForUpdate(Version)
+
+	needsUpdate = uc.UpdateAvailable
+
+	filename := "hsvr-utils.log"
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
@@ -31,10 +40,12 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 
 	log.Println("log file created")
-	go systray.Run(onReady, onExit)
+	systray.Run(onReady, onExit)
 	//hsvrApp.Run()
 
 }
+
+var needsUpdate bool
 
 func onReady() {
 	systray.SetIcon(definitions.Icon)
@@ -53,6 +64,15 @@ func onReady() {
 	enableStartup := systray.AddMenuItemCheckbox("Start on boot", "Start the app when you log in.", false)
 	//showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
 
+	systray.AddSeparator()
+	systray.AddMenuItem("Current version: "+Version, "")
+
+	var c *systray.MenuItem
+
+	if needsUpdate {
+		c = systray.AddMenuItem("Update Available", "")
+	}
+
 	if exists {
 		enableStartup.Check()
 	}
@@ -63,6 +83,11 @@ func onReady() {
 		select {
 		//case <-showFrontend.ClickedCh:
 		//apifrontend.BuildFrontend()
+		case <-c.ClickedCh:
+			err := exec.Command("open", "https://github.com/bomkz/hsvr-utils/releases/latest").Run()
+			if err != nil {
+				log.Println(err)
+			}
 		case <-quit.ClickedCh:
 			onExit()
 		case <-enableStartup.ClickedCh:
