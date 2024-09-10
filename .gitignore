@@ -1,5 +1,4 @@
 *.exe
-go.sum
 *.yaml
 *.iml
 *.xml

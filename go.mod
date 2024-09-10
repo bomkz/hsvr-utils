@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	fyne.io/fyne/v2 v2.5.1
 	github.com/Christian1984/go-update-checker v0.0.3
-	github.com/bomkz/vtolvr-utils v0.0.0-20240909194415-931171122868
+	github.com/bomkz/hsvr-utils 
 	github.com/getlantern/systray v1.2.2
 	github.com/google/uuid v1.6.0
 	github.com/hugolgst/rich-go v0.0.0-20240715122152-74618cc1ace2

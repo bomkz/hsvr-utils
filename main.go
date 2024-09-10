@@ -2,15 +2,15 @@ package main
 
 import (
 	updatechecker "github.com/Christian1984/go-update-checker"
-	"github.com/bomkz/vtolvr-utils/definitions"
-	"github.com/bomkz/vtolvr-utils/richpresence"
+	"github.com/bomkz/hsvr-utils/definitions"
+	"github.com/bomkz/hsvr-utils/richpresence"
 	"log"
 	"os"
 
 	"github.com/getlantern/systray"
 )
 
-var Version = "0.0"
+var Version = "1.2.3"
 
 func main() {
 	//hsvrApp := app.New()
