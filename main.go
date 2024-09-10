@@ -2,16 +2,12 @@ package main
 
 import (
 	"fmt"
-	updatechecker "github.com/Christian1984/go-update-checker"
 	"github.com/bomkz/hsvr-utils/definitions"
 	"github.com/bomkz/hsvr-utils/richpresence"
+	"github.com/getlantern/systray"
 	"log"
 	"os"
-
-	"github.com/getlantern/systray"
 )
-
-var Version = "0.0.0"
 
 func main() {
 	//hsvrApp := app.New()
@@ -37,10 +33,6 @@ func main() {
 
 	log.Println("log file created")
 
-	uc := updatechecker.New("bomkz", "hsvr-utils", "HSVR Utilities", "https://github.com/bomkz/hsvr-utils/releases/latest", 0, false)
-	uc.CheckForUpdate(Version)
-
-	needsUpdate = uc.UpdateAvailable
 	systray.Run(onReady, onExit)
 	//hsvrApp.Run()
 
@@ -65,15 +57,6 @@ func onReady() {
 	enableStartup := systray.AddMenuItemCheckbox("Start on boot", "Start the app when you log in.", false)
 	//showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
 
-	systray.AddSeparator()
-	systray.AddMenuItem("Current version: "+Version, "")
-
-	var c *systray.MenuItem
-
-	if needsUpdate {
-		c = systray.AddMenuItem("Update Available", "")
-	}
-
 	if exists {
 		enableStartup.Check()
 	}
@@ -84,11 +67,7 @@ func onReady() {
 		select {
 		//case <-showFrontend.ClickedCh:
 		//apifrontend.BuildFrontend()
-		case <-c.ClickedCh:
-			openbrowser("https://github.com/bomkz/hsvr-utils/releases/latest")
-			if err != nil {
-				log.Println(err)
-			}
+
 		case <-quit.ClickedCh:
 			onExit()
 		case <-enableStartup.ClickedCh:
