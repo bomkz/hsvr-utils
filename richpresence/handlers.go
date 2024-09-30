@@ -308,6 +308,18 @@ func onKill(message bytes.Buffer) {
 
 	}
 
+	for _, y := range Kill.Data.Victim.Occupants {
+		if y == steamID64 && !userOnline {
+			handleUserOnline()
+			go queryUser()
+		}
+
+		if y == steamID64 {
+			latestUserStats.Deaths += 1
+			go queryUser()
+		}
+	}
+
 }
 
 func handleUserOnline() {
