@@ -1,12 +1,14 @@
+//go:generate goversioninfo -icon=definitions/aircraft.ico -manifest=definitions/hsvr-utils.exe.manifest
 package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/bomkz/hsvr-utils/definitions"
 	"github.com/bomkz/hsvr-utils/richpresence"
 	"github.com/getlantern/systray"
-	"log"
-	"os"
 )
 
 func main() {
