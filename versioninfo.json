@@ -8,8 +8,8 @@
         },
         "ProductVersion": {
             "Major": 1,
-            "Minor": 3,
-            "Patch": 1,
+            "Minor": 4,
+            "Patch": 0,
             "Build": 0
         },
         "FileFlagsMask": "3f",
@@ -25,11 +25,11 @@
         "FileVersion": "1.4.0.0",
         "InternalName": "abacus",
         "LegalCopyright": "The Unlicense",
-        "LegalTrademarks": "None",
+        "LegalTrademarks": "Nuh Uh",
         "OriginalFilename": "hsvr-utils.exe",
         "PrivateBuild": "false",
         "ProductName": "hsvr-utils",
-        "ProductVersion": "v1.3.1",
+        "ProductVersion": "1.4.0.0",
         "SpecialBuild": "false"
     },
     "VarFileInfo": {

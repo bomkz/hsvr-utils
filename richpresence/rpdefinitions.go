@@ -47,9 +47,10 @@ type spawnDataStruct struct {
 }
 
 type serverInfoStruct struct {
-	OnlineUsers []string          `json:"onlineUsers"`
-	MissionID   string            `json:"missionId"`
-	Environment environmentStruct `json:"environment"`
+	OnlineUsers     []string          `json:"onlineUsers"`
+	OnlineUsersFull []userStruct      `json:"onlineUsersFull"`
+	MissionID       string            `json:"missionId"`
+	Environment     environmentStruct `json:"environment"`
 }
 
 type environmentStruct struct {
@@ -66,12 +67,15 @@ type windStruct struct {
 }
 
 type userStruct struct {
-	OwnerID   string   `json:"ownerId"`
-	Occupants []string `json:"occupants"`
-	Position  xyz      `json:"position"`
-	Velocity  xyz      `json:"velocity"`
-	Team      string   `json:"team"`
-	Type      string   `json:"type"`
+	OwnerID      string   `json:"ownerId"`
+	EntOwnerID   string   `json:"entOwnerID"`
+	Slot         int      `json:"slot"`
+	Occupants    []string `json:"occupants"`
+	Position     xyz      `json:"position"`
+	Velocity     xyz      `json:"velocity"`
+	Team         string   `json:"team"`
+	Type         string   `json:"type"`
+	LastViffTime int64    `json:"lastViffTime"`
 }
 
 type xyz struct {

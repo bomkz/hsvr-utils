@@ -12,11 +12,6 @@ import (
 )
 
 func main() {
-	//hsvrApp := app.New()
-	//aircraft := fyne.NewStaticResource("aircraft", definitions.Icon)
-	//hsvrApp.SetIcon(aircraft)
-
-	//definitions.FrontendWindow = hsvrApp.NewWindow("HSVR API Frontend")
 
 	filename := "hsvr-utils.log"
 	homedir, err := os.UserHomeDir()
@@ -36,11 +31,7 @@ func main() {
 	log.Println("log file created")
 
 	systray.Run(onReady, onExit)
-	//hsvrApp.Run()
-
 }
-
-var needsUpdate bool
 
 func onReady() {
 	systray.SetIcon(definitions.Icon)
@@ -57,7 +48,6 @@ func onReady() {
 	}
 
 	enableStartup := systray.AddMenuItemCheckbox("Start on boot", "Start the app when you log in.", false)
-	//showFrontend := systray.AddMenuItem("Show Frontend", "Open Frontend GUI.")
 
 	if exists {
 		enableStartup.Check()
@@ -67,8 +57,6 @@ func onReady() {
 
 	for {
 		select {
-		//case <-showFrontend.ClickedCh:
-		//apifrontend.BuildFrontend()
 
 		case <-quit.ClickedCh:
 			onExit()

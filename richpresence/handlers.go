@@ -31,6 +31,8 @@ func DataTypeHandler(message bytes.Buffer, datatype string) {
 		onKill(message)
 	case "response":
 		populateELO(message)
+	default:
+		log.Fatal(message.String())
 	}
 }
 
@@ -140,7 +142,7 @@ func updateRichPresence() {
 		},
 	})
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -178,7 +180,7 @@ func queryUser() {
 
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 	newUserLookup.MessageType = "lookup"
@@ -188,13 +190,13 @@ func queryUser() {
 
 	newUserLookupByte, err := json.Marshal(newUserLookup)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 
 	err = localSocket.WriteString(string(newUserLookupByte))
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 }
@@ -202,6 +204,7 @@ func queryUser() {
 func checkIfUserIsOnline() bool {
 	for _, y := range onlineUsers.Data {
 		if y.UID == steamID64 {
+
 			return true
 		}
 	}
@@ -212,7 +215,7 @@ func onUserLogin(message bytes.Buffer) {
 	var UserLogin logStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogin)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 
@@ -222,7 +225,7 @@ func onUserLogout(message bytes.Buffer) {
 	var UserLogout logStruct
 	err := json.Unmarshal(message.Bytes(), &UserLogout)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 
@@ -232,7 +235,7 @@ func onOnlineUpdate(message bytes.Buffer) {
 	var OnlineUpdate onlineStruct
 	err := json.Unmarshal(message.Bytes(), &OnlineUpdate)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 	onlineUsers = OnlineUpdate
@@ -250,7 +253,7 @@ func onSpawn(message bytes.Buffer) {
 	var Spawn spawnStruct
 	err := json.Unmarshal(message.Bytes(), &Spawn)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 
@@ -270,7 +273,7 @@ func onDeath(message bytes.Buffer) {
 	var Death deathStruct
 	err := json.Unmarshal(message.Bytes(), &Death)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 
@@ -283,6 +286,7 @@ func onDeath(message bytes.Buffer) {
 			latestUserStats.CurrentVehicle = "vtolvr"
 			latestUserStats.Deaths += 1
 			latestUserStats.SpawnedIn = false
+			latestUserStats.CurrentVehicle = Death.Data.Victim.Type
 			go queryUser()
 		}
 	}
@@ -293,7 +297,7 @@ func onKill(message bytes.Buffer) {
 	var Kill killStruct
 	err := json.Unmarshal(message.Bytes(), &Kill)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 	for _, y := range Kill.Data.Killer.Occupants {
@@ -302,6 +306,7 @@ func onKill(message bytes.Buffer) {
 			go queryUser()
 		}
 		if y == steamID64 {
+			latestUserStats.CurrentVehicle = Kill.Data.Killer.Type
 			latestUserStats.Kills += 1
 			go queryUser()
 		}
@@ -316,6 +321,7 @@ func onKill(message bytes.Buffer) {
 
 		if y == steamID64 {
 			latestUserStats.Deaths += 1
+			latestUserStats.CurrentVehicle = Kill.Data.Victim.Type
 			go queryUser()
 		}
 	}
