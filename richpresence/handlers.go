@@ -101,7 +101,7 @@ func updateRichPresence() {
 
 	kdr := strconv.Itoa(latestUserStats.Kills) + "K/" + strconv.Itoa(latestUserStats.Deaths) + "D/" + fmt.Sprint(latestUserStats.Ratio) + "R"
 	state := "ELO: " + fmt.Sprint(latestUserStats.ELO) + " | " + kdr + " | " + "Rank:" + fmt.Sprint(latestUserStats.CurrentRank)
-	details := "VTOLVR 24/7RankedBVR"
+	details := "24/7 Raked BVR"
 	var aircraft string
 	var smalltext string
 	largetext := "Currently flying: "
@@ -204,7 +204,6 @@ func queryUser() {
 func checkIfUserIsOnline() bool {
 	for _, y := range onlineUsers.Data {
 		if y.UID == steamID64 {
-
 			return true
 		}
 	}

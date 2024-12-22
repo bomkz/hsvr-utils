@@ -3,13 +3,13 @@
         "FileVersion": {
             "Major": 1,
             "Minor": 4,
-            "Patch": 0,
+            "Patch": 1,
             "Build": 0
         },
         "ProductVersion": {
             "Major": 1,
             "Minor": 4,
-            "Patch": 0,
+            "Patch": 1,
             "Build": 0
         },
         "FileFlagsMask": "3f",
@@ -22,14 +22,14 @@
         "Comments": "24/7 Ranked BVR Rich Presence for Discord",
         "CompanyName": "Bomkz",
         "FileDescription": "24/7 Ranked BVR Rich Presence for Discord",
-        "FileVersion": "1.4.0.0",
+        "FileVersion": "1.4.1.0",
         "InternalName": "abacus",
         "LegalCopyright": "The Unlicense",
         "LegalTrademarks": "Nuh Uh",
         "OriginalFilename": "hsvr-utils.exe",
         "PrivateBuild": "false",
         "ProductName": "hsvr-utils",
-        "ProductVersion": "1.4.0.0",
+        "ProductVersion": "1.4.1.0",
         "SpecialBuild": "false"
     },
     "VarFileInfo": {
